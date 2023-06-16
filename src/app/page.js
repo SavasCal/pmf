@@ -1,6 +1,9 @@
 "use client"; 
 
-import { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+// Replace this with the path to your image or URL
+import successImage from '../../public/3.png'
+import Confetti from 'react-confetti';
 
 const questions = [
   { 
@@ -35,12 +38,19 @@ const questions = [
   }
 ];
 
-
 const IndexPage = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
+  const [height, setHeight] = useState(null);
+  const [width, setWidth] = useState(null);
+  const confettiRef = useRef(null);
+
+  useEffect(() => {
+    setHeight(window.innerHeight);
+    setWidth(window.innerWidth);
+  }, []);
 
   const handleAnswerOptionClick = (option) => {
     setSelectedOption(option);
@@ -56,22 +66,41 @@ const IndexPage = () => {
     }
   };
 
+  const resetGame = () => {
+    setCurrentQuestion(0);
+    setScore(0);
+    setShowScore(false);
+    setSelectedOption(null);
+  };
+
   const percentageScore = (score / (questions.length * 5)) * 100;
 
   let bgColor;
+  let textMessage;
+  let scoreImage;
+  let confettiEffect;
   if (percentageScore < 33) {
     bgColor = 'bg-red-500';
+    textMessage = "You need more practice!";
   } else if (percentageScore < 66) {
     bgColor = 'bg-yellow-500';
+    textMessage = "Good job, but you can do better!";
   } else {
     bgColor = 'bg-green-500';
+    textMessage = "Excellent work!";
+    scoreImage = <img src={successImage} alt="success" className="w-40 h-40 mt-4" />;
+    confettiEffect = <Confetti numberOfPieces={150} width={width} height={height} friction={0.97} />;
   }
 
  return (
-    <div className={`flex flex-col items-center justify-center min-h-screen text-black ${showScore ? bgColor : 'bg-blue-50 text-blue-700'}`}>
+    <div className={`flex flex-col items-center justify-center min-h-screen text-black ${showScore ? bgColor : 'bg-blue-50 text-blue-700'}`} ref={confettiRef}>
       {showScore ? (
         <div className='text-2xl'>
-          You scored {score} out of {questions.length * 5}
+          <div>You scored {score} out of {questions.length * 5}</div>
+          <div>{textMessage}</div>
+          {scoreImage}
+          {confettiEffect}
+          <button onClick={resetGame} className="w-full px-4 py-2 mt-4 bg-blue-500 text-white rounded">Reset Quiz</button>
         </div>
       ) : (
         <>
